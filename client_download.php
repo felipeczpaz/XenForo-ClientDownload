@@ -48,19 +48,19 @@ function downloadClient() {
 
 function doesUserHavePermissionToDownload($user) {
     // User is not logged in or is banned
-	if (!$user->user_id || $user->is_banned)
-		return false;
-
+    if (!$user->user_id || $user->is_banned)
+        return false;
+    
     // User is a customer/VIP member
-	$customerGroupId = 5;
-	if (in_array($customerGroupId, $user->secondary_group_ids))
-		return true;
-
+    $customerGroupId = 5;
+    if (in_array($customerGroupId, $user->secondary_group_ids))
+        return true;
+    
     // User is a staff member
-	if ($user->is_moderator || $user->is_admin || $user->is_super_admin)
-		return true;
-
-	return false;
+    if ($user->is_moderator || $user->is_admin || $user->is_super_admin)
+        return true;
+    
+    return false;
 }
 
 $dir = __DIR__;
