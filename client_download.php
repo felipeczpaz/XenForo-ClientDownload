@@ -1,10 +1,9 @@
 <?php
 
-// Allow only POST; GET requests will be cached in the browser
+// Check if the request method is not POST
 if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
-    // Redirect to an error page or deny access
-    header('HTTP/1.1 403 Forbidden');
-    echo 'Access denied. Only POST requests are allowed.';
+    header("HTTP/1.0 405 Method Not Allowed");
+    echo "Only POST requests are allowed";
     exit;
 }
 
@@ -12,7 +11,7 @@ if ($_SERVER['REQUEST_METHOD'] !== 'POST') {
 $phpVersion = phpversion();
 if (version_compare($phpVersion, '7.0.0', '<'))
 {
-	die("PHP 7.0.0 or newer is required. $phpVersion does not meet this requirement. Please ask your host to upgrade PHP.");
+        die("PHP 7.0.0 or newer is required. $phpVersion does not meet this requirement. Please ask your host to upgrade PHP.");
 }
 
 // Function to generate a random name
@@ -31,7 +30,7 @@ function downloadClient() {
 
     if (file_exists($filePath)) {
         // Generate a random name for the downloaded file
-        $randomFileName = generateRandomName(13) . '.exe';
+        $randomFileName = generateRandomName(10) . '.exe';
 
         // Set the content type and headers for download
         header('Content-Type: application/octet-stream');
@@ -47,19 +46,26 @@ function downloadClient() {
 }
 
 function doesUserHavePermissionToDownload($user) {
+    $moderatorGroupId = 3;
+    $adminGroupId     = 4;
+    $customerGroupId  = 5;
+
     // User is not logged in or is banned
-    if (!$user->user_id || $user->is_banned)
+    if (!$user['user_id'] || $user['is_banned'])
         return false;
-    
+
+	// User is a moderator or forum admin
+    if ($user['user_group_id'] == $moderatorGroupId || $user['user_group_id'] == $adminGroupId)
+        return true;
+
     // User is a customer/VIP member
-    $customerGroupId = 5;
-    if (in_array($customerGroupId, $user->secondary_group_ids))
+    if ($user['user_group_id'] == $customerGroupId || in_array($customerGroupId, $user->secondary_group_ids))
         return true;
-    
+
     // User is a staff member
-    if ($user->is_moderator || $user->is_admin || $user->is_super_admin)
+    if ($user['is_moderator'] || $user['is_admin'] || $user['is_super_admin'])
         return true;
-    
+
     return false;
 }
 
@@ -78,5 +84,4 @@ if (doesUserHavePermissionToDownload($user)) {
     header('HTTP/1.1 403 Forbidden');
     echo 'You are not allowed to download this Cheat.';
 }
-
 ?>
